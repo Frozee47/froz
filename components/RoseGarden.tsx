@@ -20,57 +20,23 @@ const RoseGarden: React.FC<RoseGardenProps> = ({ onReset }) => {
     canvas.width = width;
     canvas.height = height;
 
-    const particles: Particle[] = [];
-    const rockets: Rocket[] = [];
-    let frameCount = 0;
-    
-    class Rocket {
-      x: number;
-      y: number;
-      vy: number;
-      color: string;
-      exploded: boolean;
-      type: 'heart' | 'normal';
-
-      constructor() {
-        this.x = Math.random() * width;
-        this.y = height;
-        // Launch higher to explode in the sky
-        this.vy = -(Math.random() * 4 + 14); 
-        // Golden, Red, Pink, Purple hues
-        const hues = [340, 350, 0, 10, 45, 280];
-        const hue = hues[Math.floor(Math.random() * hues.length)];
-        this.color = `hsl(${hue}, 100%, 70%)`;
-        this.exploded = false;
-        this.type = Math.random() > 0.3 ? 'heart' : 'normal';
-      }
-
-      draw() {
-        if (!ctx) return;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.fill();
-        
-        // Trail effect
-        ctx.beginPath();
-        ctx.moveTo(this.x, this.y);
-        ctx.lineTo(this.x, this.y + 15);
-        ctx.strokeStyle = `rgba(255, 255, 255, 0.4)`;
-        ctx.stroke();
-      }
-
-      update() {
-        this.y += this.vy;
-        this.vy += 0.2; // Gravity
-
-        // Explode when slowing down
-        if (this.vy >= -1 && !this.exploded) {
-          this.exploded = true;
-          createExplosion(this.x, this.y, this.color, this.type);
-        }
-      }
-    }
+    // Configuration
+    const CONFIG = {
+       gravity: 0.04,
+       friction: 0.96,
+       rocketSpeed: 16,
+       particleCount: 100,
+       heartParticleCount: 120,
+       colors: [
+         '#FFD700', // Gold
+         '#FF0000', // Red
+         '#FF69B4', // Hot Pink
+         '#DA70D6', // Orchid
+         '#00FFFF', // Cyan
+         '#FFFFFF', // White
+         '#FFA500'  // Orange
+       ]
+    };
 
     class Particle {
       x: number;
@@ -81,94 +47,154 @@ const RoseGarden: React.FC<RoseGardenProps> = ({ onReset }) => {
       color: string;
       decay: number;
       size: number;
+      shimmer: boolean;
 
-      constructor(x: number, y: number, color: string, velocityX: number, velocityY: number) {
+      constructor(x: number, y: number, color: string, vx: number, vy: number, shimmer: boolean = false) {
         this.x = x;
         this.y = y;
-        this.vx = velocityX;
-        this.vy = velocityY;
+        this.vx = vx;
+        this.vy = vy;
         this.alpha = 1;
         this.color = color;
-        this.decay = Math.random() * 0.015 + 0.005;
+        this.decay = Math.random() * 0.015 + 0.008;
         this.size = Math.random() * 2 + 1;
+        this.shimmer = shimmer;
+      }
+
+      update() {
+        this.vx *= CONFIG.friction;
+        this.vy *= CONFIG.friction;
+        this.vy += CONFIG.gravity;
+        this.x += this.vx;
+        this.y += this.vy;
+        this.alpha -= this.decay;
+
+        if (this.shimmer) {
+           if (Math.random() > 0.8) this.alpha = 1; // Twinkle effect
+        }
       }
 
       draw() {
         if (!ctx) return;
         ctx.save();
-        ctx.globalAlpha = this.alpha;
+        ctx.globalAlpha = Math.max(0, this.alpha);
+        ctx.fillStyle = this.color;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
+        ctx.fill();
+        
+        // Glow
         ctx.shadowBlur = 10;
         ctx.shadowColor = this.color;
         ctx.fill();
+        
         ctx.restore();
-      }
-
-      update() {
-        this.x += this.vx;
-        this.y += this.vy;
-        this.vy += 0.05; // Gravity
-        this.vx *= 0.96; // Friction
-        this.vy *= 0.96;
-        this.alpha -= this.decay;
       }
     }
 
-    function createExplosion(x: number, y: number, color: string, type: 'heart' | 'normal') {
-      
-      if (type === 'heart') {
-        // Heart Shape Calculation
-        const particleCount = 80;
-        for (let i = 0; i < particleCount; i++) {
-          const angle = (Math.PI * 2 * i) / particleCount;
-          
-          // Heart formula parametric equations
-          // x = 16sin^3(t)
-          // y = 13cos(t) - 5cos(2t) - 2cos(3t) - cos(4t)
-          
-          const force = Math.random() * 1.5 + 1;
-          const vx = (16 * Math.pow(Math.sin(angle), 3)) * (force / 20);
-          // Flip Y because canvas Y is down
-          const vy = -(13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle)) * (force / 20);
+    class Rocket {
+      x: number;
+      y: number;
+      vy: number;
+      color: string;
+      exploded: boolean;
+      type: 'heart' | 'sphere' | 'ring';
 
-          particles.push(new Particle(x, y, color, vx, vy));
+      constructor() {
+        this.x = (Math.random() * 0.6 + 0.2) * width; // Spawn in middle 60% of screen
+        this.y = height;
+        this.vy = -(Math.random() * 4 + 12 + (height / 100)); // Dynamic height based on screen height
+        this.color = CONFIG.colors[Math.floor(Math.random() * CONFIG.colors.length)];
+        this.exploded = false;
+        
+        const rand = Math.random();
+        if (rand < 0.4) this.type = 'heart';
+        else if (rand < 0.7) this.type = 'ring';
+        else this.type = 'sphere';
+      }
+
+      update() {
+        this.y += this.vy;
+        this.vy += CONFIG.gravity;
+
+        // Trail
+        if (frameCount % 2 === 0) {
+           particles.push(new Particle(this.x, this.y, '#FFFFFF', (Math.random()-0.5)*0.5, (Math.random()-0.5)*0.5, true));
         }
-      } else {
-        // Normal spherical explosion
-        for (let i = 0; i < 50; i++) {
-          const angle = Math.random() * Math.PI * 2;
-          const speed = Math.random() * 5 + 2;
-          const vx = Math.cos(angle) * speed;
-          const vy = Math.sin(angle) * speed;
-          particles.push(new Particle(x, y, color, vx, vy));
+
+        // Explode condition
+        if (this.vy >= -1.5 && !this.exploded) {
+          this.exploded = true;
+          createExplosion(this.x, this.y, this.color, this.type);
         }
       }
-      
-      // Sparkles (Glitter)
-      for(let i=0; i<20; i++) {
-         const angle = Math.random() * Math.PI * 2;
-         const v = Math.random() * 3;
-         particles.push(new Particle(x, y, '#FFFFFF', Math.cos(angle)*v, Math.sin(angle)*v));
+
+      draw() {
+        if (!ctx) return;
+        ctx.fillStyle = '#FFF';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+        ctx.fill();
       }
+    }
+
+    const particles: Particle[] = [];
+    const rockets: Rocket[] = [];
+    let frameCount = 0;
+
+    function createExplosion(x: number, y: number, color: string, type: 'heart' | 'sphere' | 'ring') {
+       
+       if (type === 'heart') {
+         const count = CONFIG.heartParticleCount;
+         for (let i = 0; i < count; i++) {
+            const angle = (Math.PI * 2 * i) / count;
+            // Heart Equation
+            // x = 16 * sin(t)^3
+            // y = 13 * cos(t) - 5 * cos(2t) - 2 * cos(3t) - cos(4t)
+            const r = Math.random() * 0.5 + 1.5; // Blast radius variation
+            const vx = (16 * Math.pow(Math.sin(angle), 3));
+            const vy = -(13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle));
+            
+            // Normalize and scale
+            const scale = 0.15 * (Math.random() * 0.2 + 0.8);
+            
+            particles.push(new Particle(x, y, color, vx * scale * r, vy * scale * r, true));
+         }
+       } else if (type === 'ring') {
+         const count = 60;
+         for (let i = 0; i < count; i++) {
+             const angle = (Math.PI * 2 * i) / count;
+             const speed = 4;
+             particles.push(new Particle(x, y, color, Math.cos(angle) * speed, Math.sin(angle) * speed, false));
+             // Inner ring
+             particles.push(new Particle(x, y, '#FFFFFF', Math.cos(angle) * (speed * 0.6), Math.sin(angle) * (speed * 0.6), true));
+         }
+       } else {
+         // Sphere
+         const count = CONFIG.particleCount;
+         for (let i = 0; i < count; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = Math.random() * 5 + 1;
+            particles.push(new Particle(x, y, color, Math.cos(angle) * speed, Math.sin(angle) * speed, Math.random() > 0.5));
+         }
+       }
     }
 
     function animate() {
       if (!ctx) return;
       frameCount++;
       
-      // Light trail effect (longer trails)
-      ctx.fillStyle = 'rgba(2, 0, 5, 0.2)'; 
+      // Semi-transparent clear for trail effect
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
       ctx.fillRect(0, 0, width, height);
 
-      // Rocket spawn logic
-      // Start slow, then increase intensity after 2 seconds (approx 120 frames)
-      let spawnChance = 0.02;
-      if (frameCount > 150) spawnChance = 0.05; // More intense after flowers start blooming
-      if (frameCount > 300) spawnChance = 0.08; // Grand finale
+      // Rocket Spawning Logic
+      // Starts slow, gets intense after flowers likely bloom (approx 200 frames)
+      let chance = 0.02; 
+      if (frameCount > 200) chance = 0.06;
+      if (frameCount > 400) chance = 0.1; // Finale
 
-      if (Math.random() < spawnChance) {
+      if (Math.random() < chance) {
         rockets.push(new Rocket());
       }
 
@@ -176,18 +202,14 @@ const RoseGarden: React.FC<RoseGardenProps> = ({ onReset }) => {
       for (let i = rockets.length - 1; i >= 0; i--) {
         rockets[i].update();
         rockets[i].draw();
-        if (rockets[i].exploded) {
-          rockets.splice(i, 1);
-        }
+        if (rockets[i].exploded) rockets.splice(i, 1);
       }
 
       // Update Particles
       for (let i = particles.length - 1; i >= 0; i--) {
         particles[i].update();
         particles[i].draw();
-        if (particles[i].alpha <= 0) {
-          particles.splice(i, 1);
-        }
+        if (particles[i].alpha <= 0) particles.splice(i, 1);
       }
 
       requestAnimationFrame(animate);
@@ -512,7 +534,7 @@ const RoseGarden: React.FC<RoseGardenProps> = ({ onReset }) => {
       <div className="moon"></div>
 
       {/* Stars (Increased count) */}
-      {Array.from({ length: 30 }).map((_, i) => (
+      {Array.from({ length: 40 }).map((_, i) => (
           <div
             key={i}
             className="star"
@@ -528,7 +550,7 @@ const RoseGarden: React.FC<RoseGardenProps> = ({ onReset }) => {
 
       {/* Thank You Message in the Sky */}
       <div className="thank-you-text font-serif text-white/90 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
-          <h2 className="text-3xl md:text-5xl font-bold mb-2 tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-500">Teşekkürler</h2>
+          <h2 className="text-3xl md:text-5xl font-bold mb-2 tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-500">İyi ki Varsınız</h2>
           <p className="text-lg font-hand text-yellow-100/80">Işığınız hiç sönmesin...</p>
       </div>
 
