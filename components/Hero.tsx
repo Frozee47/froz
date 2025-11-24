@@ -4,6 +4,7 @@ import { generateTeacherMessage } from '../services/geminiService';
 import MessageModal from './MessageModal';
 import RoseGarden from './RoseGarden';
 import CinematicIntro from './CinematicIntro';
+import BookOfLife from './BookOfLife';
 import { AppState } from '../types';
 
 const Hero: React.FC = () => {
@@ -124,7 +125,7 @@ const Hero: React.FC = () => {
   };
 
   return (
-    <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4 pb-20">
+    <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4 pb-20 pt-10">
       
       {/* Audio Control */}
       <button 
@@ -147,25 +148,31 @@ const Hero: React.FC = () => {
       <div className={`transition-all duration-1000 ease-in-out flex flex-col items-center justify-center w-full ${showRoses ? 'opacity-0 blur-sm pointer-events-none' : 'opacity-100'}`}>
         
         {/* Animated Title Section */}
-        <div className="mb-12 animate-fade-in-up">
+        <div className="mb-8 animate-fade-in-up">
           <div className="inline-block p-6 bg-black/30 backdrop-blur-md rounded-xl border border-white/10 shadow-2xl transform hover:scale-105 transition-transform duration-500">
-            <h1 className="text-5xl md:text-7xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-gold-accent to-orange-200 mb-2 drop-shadow-sm">
+            <h1 className="text-4xl md:text-6xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-gold-accent to-orange-200 mb-2 drop-shadow-sm">
               Öğretmenler Günü
             </h1>
-            <h2 className="text-2xl md:text-4xl font-hand text-white tracking-wide">
+            <h2 className="text-xl md:text-3xl font-hand text-white tracking-wide">
               Kutlu Olsun
             </h2>
           </div>
         </div>
 
         {/* Main Action Card */}
-        <div className="max-w-md w-full bg-indigo-950/40 backdrop-blur-lg border border-purple-500/30 rounded-3xl p-8 shadow-2xl animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+        <div className="max-w-md w-full bg-indigo-950/40 backdrop-blur-lg border border-purple-500/30 rounded-3xl p-8 shadow-2xl animate-fade-in-up relative overflow-visible" style={{ animationDelay: '0.2s' }}>
+          
+          {/* NEW: Book of Life Animation floating above */}
+          <div className="-mt-24 mb-4">
+             <BookOfLife />
+          </div>
+
           <p className="text-purple-200 text-lg mb-8 font-serif italic relative">
             Nazlı Demirel
             <br />
-            <span className="mt-6 block relative group">
+            <span className="mt-4 block relative group">
                <span className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg blur opacity-40 group-hover:opacity-75 transition duration-1000"></span>
-               <span className="relative block text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-200 via-white to-gold-accent font-serif tracking-widest not-italic animate-shine uppercase">
+               <span className="relative block text-lg md:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-200 via-white to-gold-accent font-serif tracking-widest not-italic animate-shine uppercase">
                  SEN HER ŞEYİNLE ÖĞRETMENSİN
                </span>
             </span>
@@ -197,7 +204,7 @@ const Hero: React.FC = () => {
                   <>
                     <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/50 to-transparent pointer-events-none"></span>
                     <Stars className="w-5 h-5 text-yellow-200 animate-spin-slow" />
-                    <span className="drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] text-sm md:text-lg">Bu Gizemli Yola Çıkmaya Ne Dersin?</span>
+                    <span className="drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] text-sm md:text-lg">Sürprizi Hazırla</span>
                     <Key className="w-5 h-5 text-yellow-200 group-hover:rotate-45 transition-transform duration-300" />
                   </>
                 )}

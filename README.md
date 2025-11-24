@@ -1,20 +1,48 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 🌹 Öğretmenler Günü - Ruhun Mimarı
 
-# Run and deploy your AI Studio app
+Bu proje, **Google Gemini API** kullanılarak hazırlanmış, öğretmenler için duygusal, edebi ve kişiselleştirilmiş kutlama mesajları üreten interaktif bir web uygulamasıdır.
 
-This contains everything you need to run your app locally.
+## ✨ Özellikler
 
-View your app in AI Studio: https://ai.studio/apps/drive/1VQvOPsNf-yvJjOSUFltTn22XjEK2NVkh
+*   **Yapay Zeka Destekli İçerik:** Gemini 2.5 Flash modeli kullanılarak her seferinde benzersiz, "Ruhun Mimarı" temalı mensur şiirler ve SVG ikonlar üretilir.
+*   **Sinematik Deneyim:** Kullanıcıyı içine çeken açılış animasyonları ve hikaye anlatımı.
+*   **Görsel Şölen:**
+    *   🌌 *Gece Modu & Nebula Efektleri*
+    *   🌹 *İnteraktif Gül Bahçesi Animasyonu*
+    *   ✨ *Kayan Yıldızlar ve Ateş Böcekleri*
+*   **Müzik Entegrasyonu:** Duygusal piyano müziği ile atmosferik bütünlük.
 
-## Run Locally
+## 🛠 Teknoloji Yığını
 
-**Prerequisites:**  Node.js
+*   **Frontend:** React 19, TypeScript
+*   **Stil:** Tailwind CSS
+*   **AI:** Google Gemini API (@google/genai)
+*   **İkonlar:** Lucide React
 
+## 🚀 Kurulum ve Çalıştırma
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+Bu proje modern bir frontend geliştirme ortamı gerektirir.
+
+1.  Repoyu klonlayın:
+    ```bash
+    git clone https://github.com/KULLANICI_ADINIZ/REPO_ADINIZ.git
+    ```
+
+2.  Proje dizinine gidin:
+    ```bash
+    cd ogretmenler-gunu
+    ```
+
+3.  **API Anahtarı:**
+    Projenin çalışması için bir Google Gemini API anahtarına ihtiyacınız vardır. `.env` dosyası oluşturarak anahtarınızı ekleyin (yerel ortamda çalışıyorsanız):
+    ```env
+    API_KEY=AIzaSy...
+    ```
+
+## 📸 Ekran Görüntüleri
+
+*(Buraya projenizden ekran görüntüleri ekleyebilirsiniz)*
+
+## 📝 Lisans
+
+Bu proje eğitim ve kutlama amaçlı hazırlanmıştır.

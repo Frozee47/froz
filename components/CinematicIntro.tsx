@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 
 interface CinematicIntroProps {
@@ -10,24 +11,23 @@ const CinematicIntro: React.FC<CinematicIntroProps> = ({ ready, onComplete }) =>
   const [opacity, setOpacity] = useState(1);
   const [waitingMode, setWaitingMode] = useState(false);
 
-  // "Ruhun Mimarı" Senaryosu
+  // EFSANEVİ SENARYO - RUHUN MİMARI
   const sentences = [
-    "Her şey bir kıvılcımla başlar...",
-    "Kaosun ortasında bir pusula belirir...",
-    "Ruhumun haritasını çizen o el...",
-    "Ve karanlığı şekillendiren o ses...",
-    "Şimdi eserine bakma vakti."
+    "Evren, büyük bir sessizlikle başlar...",
+    "Ta ki bir ses, karanlığa ışık olana dek.",
+    "O ses, bir çocuğun kalbine dokunur...",
+    "Ve orada, sonsuz bir bahçe filizlenir.",
+    "Ruhun mimarı, eserinle yüzleşme vakti."
   ];
 
   useEffect(() => {
-    const durationPerSentence = 3000; 
+    const durationPerSentence = 4000; // Biraz daha uzun okuma süresi
 
     const interval = setInterval(() => {
       setStage((prev) => {
-        // If we are at the last sentence
         if (prev >= sentences.length - 1) {
           clearInterval(interval);
-          setWaitingMode(true); // Animation part finished, now we wait for 'ready'
+          setWaitingMode(true);
           return prev;
         }
         return prev + 1;
@@ -37,120 +37,149 @@ const CinematicIntro: React.FC<CinematicIntroProps> = ({ ready, onComplete }) =>
     return () => clearInterval(interval);
   }, [sentences.length]);
 
-  // Watcher for Exit Condition
   useEffect(() => {
-    // Exit ONLY if animation is in waiting mode (finished sentences) AND API is ready
     if (waitingMode && ready) {
-       // Allow a small delay for the user to read the last sentence or the waiting message
        const exitTimeout = setTimeout(() => {
          setOpacity(0);
          setTimeout(() => {
            onComplete();
-         }, 1500); // Fade out duration
-       }, 1000);
+         }, 2000); 
+       }, 1500);
        return () => clearTimeout(exitTimeout);
     }
   }, [waitingMode, ready, onComplete]);
 
   return (
     <div 
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black transition-opacity duration-1000 overflow-hidden"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black transition-opacity duration-1500 ease-out overflow-hidden"
       style={{ opacity: opacity }}
     >
-      {/* Background: Deep Cosmos & Gold Dust */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#1e1b4b_0%,_#000000_100%)] opacity-80"></div>
-        <div className="gold-dust"></div>
-        <div className="gold-dust-2"></div>
+      {/* BACKGROUND: AURORA & COSMOS */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-[#020617]"></div>
+        {/* Aurora Borealis Effect */}
+        <div className="aurora-container">
+            <div className="aurora aurora-1"></div>
+            <div className="aurora aurora-2"></div>
+            <div className="aurora aurora-3"></div>
+        </div>
+        {/* Stars */}
+        <div className="stars-overlay"></div>
       </div>
 
       <style>{`
-        /* Gold Dust Particles Animation */
-        .gold-dust, .gold-dust-2 {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-image: 
-            radial-gradient(1px 1px at 10% 10%, #ffd700, transparent),
-            radial-gradient(1px 1px at 20% 30%, #fff, transparent),
-            radial-gradient(2px 2px at 30% 70%, #ffdf80, transparent),
-            radial-gradient(1px 1px at 40% 40%, #fff, transparent),
-            radial-gradient(2px 2px at 60% 10%, #ffd700, transparent),
-            radial-gradient(1px 1px at 80% 50%, #fff, transparent),
-            radial-gradient(2px 2px at 90% 80%, #ffdf80, transparent);
-          background-size: 300px 300px;
-          opacity: 0.6;
-          animation: floatDust 20s linear infinite;
+        /* AURORA ANIMATION */
+        .aurora-container {
+            position: absolute;
+            inset: 0;
+            filter: blur(60px);
+            opacity: 0.5;
+            z-index: 1;
+        }
+        .aurora {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 180deg at 50% 50%, #2e026d 0deg, #000000 120deg, #1e1b4b 180deg, #4c1d95 260deg, #2e026d 360deg);
+            animation: rotateAurora 20s linear infinite;
+        }
+        .aurora-2 {
+            background: conic-gradient(from 0deg at 50% 50%, #000000 0deg, #4338ca 120deg, #000000 240deg, #312e81 360deg);
+            animation: rotateAurora 25s linear infinite reverse;
+            opacity: 0.6;
+        }
+        .aurora-3 {
+             background: radial-gradient(circle at center, rgba(253, 224, 71, 0.1) 0%, transparent 50%);
+             animation: pulseGold 5s ease-in-out infinite;
         }
 
-        .gold-dust-2 {
-          background-size: 400px 400px;
-          animation: floatDust 30s linear infinite reverse;
-          opacity: 0.4;
+        @keyframes rotateAurora {
+            0% { transform: rotate(0deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1.2); }
         }
-        
-        @keyframes floatDust {
-          from { transform: translateY(0); }
-          to { transform: translateY(-100%); }
+        @keyframes pulseGold {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.5); opacity: 0.6; }
         }
 
+        .stars-overlay {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                radial-gradient(1px 1px at 10% 10%, #fff, transparent),
+                radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1px 1px at 50% 50%, #fff, transparent),
+                radial-gradient(2px 2px at 80% 80%, rgba(255,255,255,0.7), transparent);
+            background-size: 500px 500px;
+            opacity: 0.5;
+            z-index: 2;
+        }
+
+        /* CINEMATIC TEXT TRANSITIONS */
         .cinematic-text {
-          text-shadow: 0 0 10px rgba(255, 215, 0, 0.3), 0 0 20px rgba(255, 215, 0, 0.1);
+          filter: blur(10px);
+          transform: scale(0.9);
+          opacity: 0;
+          transition: all 2s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        
-        .pulse-text {
-          animation: pulse-glow 2s infinite ease-in-out;
+        .cinematic-text.active {
+          filter: blur(0px);
+          transform: scale(1);
+          opacity: 1;
         }
-        
-        @keyframes pulse-glow {
-          0%, 100% { opacity: 0.5; transform: scale(0.95); }
-          50% { opacity: 1; transform: scale(1.05); }
+        .cinematic-text.exit {
+          filter: blur(20px);
+          transform: scale(1.1);
+          opacity: 0;
+          transition: all 1.5s ease-in;
+        }
+
+        .shine-text {
+            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            background-size: 200% auto;
+            animation: shine 5s linear infinite;
+        }
+        @keyframes shine {
+            to { background-position: 200% center; }
         }
       `}</style>
 
       {/* Text Container */}
-      <div className="relative z-10 max-w-5xl px-8 text-center h-40 flex items-center justify-center">
-        {/* Main Sentences */}
+      <div className="relative z-20 max-w-4xl px-6 text-center h-60 flex items-center justify-center">
         {sentences.map((text, index) => (
-          <p
+          <div
             key={index}
             className={`
-              absolute w-full
-              text-3xl md:text-6xl font-serif text-yellow-50 cinematic-text tracking-widest leading-tight
-              transition-all duration-[1500ms] ease-in-out
-              ${index === stage && !waitingMode ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'}
+              absolute w-full flex flex-col items-center justify-center
+              cinematic-text
+              ${index === stage && !waitingMode ? 'active' : ''}
+              ${index < stage ? 'exit' : ''}
             `}
           >
-            {text}
-          </p>
+            <p className="text-3xl md:text-5xl lg:text-6xl font-serif tracking-wide leading-tight shine-text drop-shadow-[0_0_15px_rgba(253,224,71,0.3)]">
+              {text}
+            </p>
+            {index === sentences.length - 1 && (
+                <div className="mt-8 w-32 h-[1px] bg-gradient-to-r from-transparent via-yellow-200 to-transparent opacity-50"></div>
+            )}
+          </div>
         ))}
 
-        {/* Waiting Message (Shown if animation finished but API not ready) */}
+        {/* Loading Spinner / Waiting Message */}
         {waitingMode && !ready && (
-           <p className="absolute w-full text-2xl md:text-4xl font-serif text-yellow-200/80 tracking-[0.2em] pulse-text">
-             İlham perileri fısıldıyor...
-           </p>
+           <div className="absolute flex flex-col items-center justify-center gap-4 animate-pulse">
+             <div className="w-16 h-16 border-4 border-yellow-500/30 border-t-yellow-400 rounded-full animate-spin"></div>
+             <p className="text-lg font-serif text-yellow-100/60 tracking-[0.2em] uppercase">
+               İlham Bekleniyor...
+             </p>
+           </div>
         )}
       </div>
-
-      {/* Elegant Progress Line */}
-      <div className="absolute bottom-20 w-64 h-[1px] bg-white/10 rounded-full overflow-hidden">
-         <div 
-           className="h-full bg-gradient-to-r from-transparent via-gold-accent to-transparent shadow-[0_0_10px_#ffd700]"
-           style={{ 
-             width: '100%', 
-             animation: `shimmerProgress ${sentences.length * 3}s linear forwards` 
-           }}
-         ></div>
-      </div>
-      <style>{`
-        @keyframes shimmerProgress {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(0%); }
-        }
-      `}</style>
     </div>
   );
 };
