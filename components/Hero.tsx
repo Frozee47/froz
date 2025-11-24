@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Sparkles, Heart, Key, Stars, Volume2, VolumeX } from 'lucide-react';
+import { Key, Stars, Volume2, VolumeX } from 'lucide-react';
 import { generateTeacherMessage } from '../services/geminiService';
 import MessageModal from './MessageModal';
 import RoseGarden from './RoseGarden';
@@ -15,7 +15,6 @@ const Hero: React.FC = () => {
   const [showRoses, setShowRoses] = useState(false);
   const [showCinematic, setShowCinematic] = useState(false);
   const [isApiReady, setIsApiReady] = useState(false);
-  const [isCinematicFinished, setIsCinematicFinished] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
 
   // Emotional Piano Track URL (Reliable Source)

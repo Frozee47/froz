@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { LogOut } from 'lucide-react';
 
 interface RoseGardenProps {
@@ -6,6 +6,180 @@ interface RoseGardenProps {
 }
 
 const RoseGarden: React.FC<RoseGardenProps> = ({ onReset }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // --- FIREWORKS LOGIC ---
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+
+    const particles: Particle[] = [];
+    const rockets: Rocket[] = [];
+    
+    class Rocket {
+      x: number;
+      y: number;
+      vy: number;
+      color: string;
+      exploded: boolean;
+
+      constructor() {
+        this.x = Math.random() * width;
+        this.y = height;
+        this.vy = -(Math.random() * 5 + 12); // Speed adjustment
+        this.color = `hsl(${Math.random() * 50 + 330}, 100%, 70%)`; // Red/Pink/Gold hues
+        this.exploded = false;
+      }
+
+      draw() {
+        if (!ctx) return;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        
+        // Trail effect
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.x, this.y + 15);
+        ctx.strokeStyle = `rgba(255, 255, 255, 0.3)`;
+        ctx.stroke();
+      }
+
+      update() {
+        this.y += this.vy;
+        this.vy += 0.2; // Gravity
+
+        // Explode when slowing down
+        if (this.vy >= -2 && !this.exploded) {
+          this.exploded = true;
+          createExplosion(this.x, this.y, this.color);
+        }
+      }
+    }
+
+    class Particle {
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      alpha: number;
+      color: string;
+      decay: number;
+
+      constructor(x: number, y: number, color: string, velocityX: number, velocityY: number) {
+        this.x = x;
+        this.y = y;
+        this.vx = velocityX;
+        this.vy = velocityY;
+        this.alpha = 1;
+        this.color = color;
+        this.decay = Math.random() * 0.015 + 0.005;
+      }
+
+      draw() {
+        if (!ctx) return;
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.restore();
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += 0.05; // Gravity
+        this.vx *= 0.98; // Friction
+        this.vy *= 0.98;
+        this.alpha -= this.decay;
+      }
+    }
+
+    function createExplosion(x: number, y: number, color: string) {
+      // Heart Shape Calculation
+      const particleCount = 60;
+      for (let i = 0; i < particleCount; i++) {
+        const angle = (Math.PI * 2 * i) / particleCount;
+        
+        // Heart formula parametric equations
+        // x = 16sin^3(t)
+        // y = 13cos(t) - 5cos(2t) - 2cos(3t) - cos(4t)
+        // We flip Y because canvas Y is down
+        
+        const force = Math.random() * 2 + 1.5;
+        const vx = (16 * Math.pow(Math.sin(angle), 3)) * (force / 15);
+        const vy = -(13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle)) * (force / 15);
+
+        particles.push(new Particle(x, y, color, vx, vy));
+      }
+      
+      // Add some random sparkles for filler
+      for(let i=0; i<30; i++) {
+         const angle = Math.random() * Math.PI * 2;
+         const v = Math.random() * 4;
+         particles.push(new Particle(x, y, '#FFD700', Math.cos(angle)*v, Math.sin(angle)*v));
+      }
+    }
+
+    function animate() {
+      if (!ctx) return;
+      
+      // Light trail effect instead of full clear
+      ctx.fillStyle = 'rgba(2, 0, 5, 0.2)'; 
+      ctx.fillRect(0, 0, width, height);
+
+      // Random rocket spawn
+      if (Math.random() < 0.03) {
+        rockets.push(new Rocket());
+      }
+
+      // Update Rockets
+      for (let i = rockets.length - 1; i >= 0; i--) {
+        rockets[i].update();
+        rockets[i].draw();
+        if (rockets[i].exploded) {
+          rockets.splice(i, 1);
+        }
+      }
+
+      // Update Particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        particles[i].update();
+        particles[i].draw();
+        if (particles[i].alpha <= 0) {
+          particles.splice(i, 1);
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    const animationId = requestAnimationFrame(animate);
+
+    const handleResize = () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      cancelAnimationFrame(animationId);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   return (
     <div className="fixed inset-0 z-[60] overflow-hidden font-sans pointer-events-auto">
       
@@ -32,6 +206,17 @@ const RoseGarden: React.FC<RoseGardenProps> = ({ onReset }) => {
 
         @keyframes fade-in-night {
           to { opacity: 1; }
+        }
+
+        /* --- FIREWORKS CANVAS --- */
+        #fireworks-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* Behind flowers but in front of moon */
+            pointer-events: none;
         }
 
         /* --- SKY LANTERNS (DILEK FENERLERI) --- */
@@ -257,7 +442,7 @@ const RoseGarden: React.FC<RoseGardenProps> = ({ onReset }) => {
         /* --- FINAL MESSAGE TEXT --- */
         .thank-you-text {
             position: absolute;
-            top: 30%;
+            top: 25%;
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
@@ -267,13 +452,16 @@ const RoseGarden: React.FC<RoseGardenProps> = ({ onReset }) => {
             width: 100%;
         }
         @keyframes fade-text {
-            to { opacity: 1; top: 25%; }
+            to { opacity: 1; top: 20%; }
         }
 
       `}</style>
 
       {/* The Night Background */}
       <div className="night"></div>
+      
+      {/* Fireworks Canvas Overlay */}
+      <canvas ref={canvasRef} id="fireworks-canvas" />
 
       {/* Sky Lanterns (Generated via code for randomization) */}
       <div className="lantern-container">
@@ -311,7 +499,7 @@ const RoseGarden: React.FC<RoseGardenProps> = ({ onReset }) => {
 
       {/* Thank You Message in the Sky */}
       <div className="thank-you-text font-serif text-white/90 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
-          <h2 className="text-3xl md:text-5xl font-bold mb-2 tracking-widest uppercase">Teşekkürler</h2>
+          <h2 className="text-3xl md:text-5xl font-bold mb-2 tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-500">Teşekkürler</h2>
           <p className="text-lg font-hand text-yellow-100/80">Işığınız hiç sönmesin...</p>
       </div>
 

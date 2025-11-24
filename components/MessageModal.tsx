@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { X, Copy, Flower2, PenTool, Sparkles, Feather } from 'lucide-react';
+import { X, Copy, Flower2, PenTool, Feather } from 'lucide-react';
 
 interface MessageModalProps {
   isOpen: boolean;
