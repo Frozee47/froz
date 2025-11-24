@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Key, Stars, Volume2, VolumeX, ArrowRight, Feather } from 'lucide-react';
+import { Key, Stars, Volume2, VolumeX, Feather } from 'lucide-react';
 import { generateTeacherMessage } from '../services/geminiService';
 import MessageModal from './MessageModal';
 import RoseGarden from './RoseGarden';
