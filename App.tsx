@@ -1,4 +1,3 @@
-import React from 'react';
 import CanvasBackground from './components/CanvasBackground';
 import Hero from './components/Hero';
 
