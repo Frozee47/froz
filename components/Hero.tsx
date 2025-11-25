@@ -19,7 +19,7 @@ const Hero: React.FC = () => {
   const [isMuted, setIsMuted] = useState(false);
 
   // Static Name as requested
-  const teacherName = "Fırat Alpan";
+  const teacherName = "Nazlı Demirel";
 
   // Emotional Piano Track URL (Reliable Source)
   const audioRef = useRef<HTMLAudioElement | null>(null);
